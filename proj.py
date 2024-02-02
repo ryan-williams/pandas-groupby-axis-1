@@ -21,6 +21,7 @@ def project(df):
     df.groupby(lambda x:x, axis=1, level=0).apply(project))
     ```
     """
+    df = df.T
     [top_level] = df.columns.get_level_values(0).drop_duplicates()
     d = df.loc[:, top_level]
     prv_ytd = d.prv_ytd
@@ -31,10 +32,10 @@ def project(df):
     d.loc[~zero_mask, 'roy'] = prv_roy * (1 + cur_ytd_frac * (cur_ytd / prv_ytd - 1))
     d['roy'] = round(d.roy).astype(int)
     d['projected'] = cur_ytd + d.roy
-    return d[['roy', 'projected']]
+    return d[['roy', 'projected']].T
 
 
 # Compute projections
-proj = df.groupby(lambda x: x, axis=1, level=0).apply(project)
+proj = df.T.groupby(lambda x: x, level=0).apply(project).T
 print(proj)
 proj.to_csv('proj.csv')
